@@ -23,8 +23,8 @@ const generateEventData = (n) => {
 			thumbNail: i % thumbNails.length,
 			dateTime: faker.date.future().toString(),
 			artist: faker.person.fullName(),
-			price: faker.string.numeric(4) + 20,
-			tickets: faker.string.numeric(6) + 40,
+			price: faker.string.numeric({ length: 4, allowLeadingZeros: false }),
+			tickets: faker.string.numeric({ length: 6, allowLeadingZeros: false }),
 		})
 	}
 	return data
