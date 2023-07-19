@@ -35,7 +35,7 @@ const Event = ({ data }) => {
 	return (
 		<tr>
 			<td class="event-image">
-				<img src={thumbNails[thumbNail]} />
+				<img alt="thumbnail" src={thumbNails[thumbNail]} />
 			</td>
 			<td class="event-date">{dateTime}</td>
 			<td class="event-name">{name}</td>
@@ -106,10 +106,10 @@ export default class Catalog extends Component {
 			<div class="container">
 				<header>
 					<h1>
-						<img src={whiteLogo} />
+						<img alt="logo" src={whiteLogo} />
 					</h1>
 					<div class="header-cart">
-						<img src={cartImg} />
+						<img alt="cart" src={cartImg} />
 					</div>
 				</header>
 				<section>
