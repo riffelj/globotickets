@@ -1,6 +1,8 @@
 import React, { Component } from "react"
 import { faker } from "@faker-js/faker"
 
+import { Pagination, PageNavigation } from "./pagination"
+
 import "./normalize.css"
 import "./Catalog.css"
 
@@ -50,6 +52,7 @@ const Event = ({ data }) => {
 export default class Catalog extends Component {
 	state = {
 		eventData: generateEventData(5),
+		currentPage: 0,
 		artistFilter: "",
 	}
 
@@ -64,11 +67,23 @@ export default class Catalog extends Component {
 			eventData: generateEventData(
 				parseInt(this.generatorNumberInput.current.value)
 			),
+			currentPage: 0,
 		})
 	}
 
 	setFilter() {
-		this.setState({ artistFilter: this.filterInput.current.value })
+		this.setState({
+			artistFilter: this.filterInput.current.value,
+			currentPage: 0,
+		})
+	}
+
+	previousPage() {
+		this.setState({ currentPage: this.state.currentPage - 1 })
+	}
+
+	nextPage() {
+		this.setState({ currentPage: this.state.currentPage + 1 })
 	}
 
 	render() {
@@ -84,6 +99,8 @@ export default class Catalog extends Component {
 						.indexOf(this.state.artistFilter.toLowerCase()) >= 0
 			)
 		}
+
+		const filteredPages = new Pagination(filteredEvents, 5)
 
 		return (
 			<div class="container">
@@ -119,11 +136,20 @@ export default class Catalog extends Component {
 								</tr>
 							</thead>
 							<tbody>
-								{filteredEvents.map((ed, i) => (
-									<Event data={ed} key={i} />
-								))}
+								{filteredPages
+									.getPage(this.state.currentPage)
+									.map((ed, i) => (
+										<Event data={ed} key={i} />
+									))}
 							</tbody>
 						</table>
+
+						<PageNavigation
+							nextPageHandler={this.nextPage.bind(this)}
+							previousPageHandler={this.previousPage.bind(this)}
+							currentPage={this.state.currentPage}
+							totalPages={filteredPages.getTotalPages()}
+						></PageNavigation>
 					</div>
 					<input
 						type="number"
