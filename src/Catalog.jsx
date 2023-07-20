@@ -1,4 +1,4 @@
-import React, { Component } from "react"
+import React, { Component, memo } from "react"
 import { faker } from "@faker-js/faker"
 
 import { Pagination, PageNavigation } from "./pagination"
@@ -30,7 +30,14 @@ const generateEventData = (n) => {
 	return data
 }
 
-const Event = ({ data }) => {
+function areEqualEvent(prevProps, nextProps) {
+	return (
+		prevProps.data.name + prevProps.data.dateTime ===
+		nextProps.data.name + nextProps.data.dateTime
+	)
+}
+
+const Event = memo(function WrappedEvent({ data }) {
 	const { thumbNail, dateTime, name, artist, price, tickets } = data
 	return (
 		<tr>
@@ -47,7 +54,7 @@ const Event = ({ data }) => {
 			</td>
 		</tr>
 	)
-}
+}, areEqualEvent)
 
 export default class Catalog extends Component {
 	state = {
@@ -100,7 +107,7 @@ export default class Catalog extends Component {
 			)
 		}
 
-		const filteredPages = new Pagination(filteredEvents, 5)
+		const filteredPages = new Pagination(filteredEvents, 20)
 
 		return (
 			<div class="container">
@@ -139,7 +146,10 @@ export default class Catalog extends Component {
 								{filteredPages
 									.getPage(this.state.currentPage)
 									.map((ed, i) => (
-										<Event data={ed} key={i} />
+										<Event
+											data={ed}
+											key={ed.name + ed.dateTime}
+										/>
 									))}
 							</tbody>
 						</table>
