@@ -30,23 +30,34 @@ const generateEventData = (n) => {
 	return data
 }
 
-const Event = ({ data }) => {
-	const { thumbNail, dateTime, name, artist, price, tickets } = data
-	return (
-		<tr>
-			<td class="event-image">
-				<img alt="thumbnail" src={thumbNails[thumbNail]} />
-			</td>
-			<td class="event-date">{dateTime}</td>
-			<td class="event-name">{name}</td>
-			<td class="event-artist">{artist}</td>
-			<td class="event-price">${price}</td>
-			<td class="event-price">{tickets}</td>
-			<td class="event-purchase-button">
-				<button>Purchase Details</button>
-			</td>
-		</tr>
-	)
+class Event extends Component {
+	shouldComponentUpdate(nextProps) {
+		const { data } = this.props
+
+		return (
+			data.name + data.dateTime !==
+			nextProps.data.name + nextProps.data.dateTime
+		)
+	}
+
+	render() {
+		const { thumbNail, dateTime, name, artist, price, tickets } = this.props.data
+		return (
+			<tr>
+				<td class="event-image">
+					<img alt="thumbnail" src={thumbNails[thumbNail]} />
+				</td>
+				<td class="event-date">{dateTime}</td>
+				<td class="event-name">{name}</td>
+				<td class="event-artist">{artist}</td>
+				<td class="event-price">${price}</td>
+				<td class="event-price">{tickets}</td>
+				<td class="event-purchase-button">
+					<button>Purchase Details</button>
+				</td>
+			</tr>
+		)
+	}
 }
 
 export default class Catalog extends Component {
@@ -100,7 +111,7 @@ export default class Catalog extends Component {
 			)
 		}
 
-		const filteredPages = new Pagination(filteredEvents, 5)
+		const filteredPages = new Pagination(filteredEvents, 20)
 
 		return (
 			<div class="container">
@@ -139,7 +150,10 @@ export default class Catalog extends Component {
 								{filteredPages
 									.getPage(this.state.currentPage)
 									.map((ed, i) => (
-										<Event data={ed} key={i} />
+										<Event
+											data={ed}
+											key={ed.name + ed.dateTime}
+										/>
 									))}
 							</tbody>
 						</table>
