@@ -12,6 +12,11 @@ export class Pagination {
     getTotalPages() {
         return Math.ceil(this.data.length / this.pageSize)
     }
+
+    getUptoPage(n) {
+        const offset = n * this.pageSize
+        return this.data.slice(0, offset + this.pageSize)
+    }
 }
 
 export const PageNavigation = ({
