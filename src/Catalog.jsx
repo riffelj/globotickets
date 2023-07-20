@@ -1,7 +1,7 @@
 import React, { Component } from "react"
 import { faker } from "@faker-js/faker"
-
-import { Pagination, PageNavigation } from "./pagination"
+import Autosizer from "react-virtualized-auto-sizer"
+import { FixedSizeList as List } from "react-window"
 
 import "./normalize.css"
 import "./Catalog.css"
@@ -30,28 +30,29 @@ const generateEventData = (n) => {
 	return data
 }
 
-const Event = ({ data }) => {
+const eventRowHeight = 100
+const Event = ({ data, style }) => {
 	const { thumbNail, dateTime, name, artist, price, tickets } = data
 	return (
-		<tr>
-			<td class="event-image">
+		<div className="table-row" style={{ height: eventRowHeight, ...style }}>
+			<div className="table-row-data event-image">
 				<img alt="thumbnail" src={thumbNails[thumbNail]} />
-			</td>
-			<td class="event-date">{dateTime}</td>
-			<td class="event-name">{name}</td>
-			<td class="event-artist">{artist}</td>
-			<td class="event-price">${price}</td>
-			<td class="event-price">{tickets}</td>
-			<td class="event-purchase-button">
+			</div>
+			<div className="table-row-data event-date">{dateTime}</div>
+			<div className="table-row-data event-name">{name}</div>
+			<div className="table-row-data event-artist">{artist}</div>
+			<div className="table-row-data event-price">${price}</div>
+			<div className="table-row-data event-price">{tickets}</div>
+			<div className="table-row-data event-purchase-button">
 				<button>Purchase Details</button>
-			</td>
-		</tr>
+			</div>
+		</div>
 	)
 }
 
 export default class Catalog extends Component {
 	state = {
-		eventData: generateEventData(5),
+		eventData: generateEventData(35),
 		currentPage: 0,
 		artistFilter: "",
 	}
@@ -78,21 +79,20 @@ export default class Catalog extends Component {
 		})
 	}
 
-	previousPage() {
-		this.setState({ currentPage: this.state.currentPage - 1 })
-	}
-
-	nextPage() {
-		this.setState({ currentPage: this.state.currentPage + 1 })
+	virtualizedEvent({ index, style, key }) {
+		if (!this.filteredEvents || this.filteredEvents.length === 0) {
+			return null
+		}
+		return (
+			<Event data={this.filteredEvents[index]} key={key} style={style} />
+		)
 	}
 
 	render() {
-		var filteredEvents
-
 		if (!this.state.artistFilter) {
-			filteredEvents = this.state.eventData
+			this.filteredEvents = this.state.eventData
 		} else {
-			filteredEvents = this.state.eventData.filter(
+			this.filteredEvents = this.state.eventData.filter(
 				(ed) =>
 					ed.artist
 						.toLowerCase()
@@ -100,20 +100,18 @@ export default class Catalog extends Component {
 			)
 		}
 
-		const filteredPages = new Pagination(filteredEvents, 5)
-
 		return (
-			<div class="container">
+			<div className="container">
 				<header>
 					<h1>
 						<img alt="logo" src={whiteLogo} />
 					</h1>
-					<div class="header-cart">
+					<div className="header-cart">
 						<img alt="cart" src={cartImg} />
 					</div>
 				</header>
 				<section>
-					<div class="search-bar">
+					<div className="search-bar">
 						<button onClick={this.setFilter.bind(this)}>
 							Filter :
 						</button>
@@ -122,42 +120,57 @@ export default class Catalog extends Component {
 							ref={this.filterInput}
 						></input>
 					</div>
-					<div class="table">
-						<table>
-							<thead>
-								<tr>
-									<th scope="col">&nbsp;</th>
-									<th scope="col">Date</th>
-									<th scope="col">Name</th>
-									<th scope="col">Artist</th>
-									<th scope="col">Price</th>
-									<th scope="col">Tickets Left</th>
-									<th scope="col">&nbsp;</th>
-								</tr>
-							</thead>
-							<tbody>
-								{filteredPages
-									.getPage(this.state.currentPage)
-									.map((ed, i) => (
-										<Event data={ed} key={i} />
-									))}
-							</tbody>
-						</table>
-
-						<PageNavigation
-							nextPageHandler={this.nextPage.bind(this)}
-							previousPageHandler={this.previousPage.bind(this)}
-							currentPage={this.state.currentPage}
-							totalPages={filteredPages.getTotalPages()}
-						></PageNavigation>
+					<div className="table">
+						<div className="table-row">
+							<div className="table-row-data event-image">
+								&nbsp;
+							</div>
+							<div className="table-row-data event-date">
+								Date
+							</div>
+							<div className="table-row-data event-name">
+								Name
+							</div>
+							<div className="table-row-data event-artist">
+								Artist
+							</div>
+							<div className="table-row-data event-price">
+								Price
+							</div>
+							<div className="table-row-data event-price">
+								Tickets Left
+							</div>
+							<div className="table-row-data">&nbsp;</div>
+						</div>
+						<div className="table-body">
+							<Autosizer width="100%">
+								{({ height, width }) => {
+									console.log(height, width)
+									return (
+										<List
+											height={height}
+											width={width}
+											itemCount={
+												this.filteredEvents.length
+											}
+											itemSize={eventRowHeight}
+										>
+											{this.virtualizedEvent.bind(this)}
+										</List>
+									)
+								}}
+							</Autosizer>
+						</div>
 					</div>
-					<input
-						type="number"
-						ref={this.generatorNumberInput}
-					></input>
-					<button onClick={this.generateEvents.bind(this)}>
-						Add
-					</button>
+					<div>
+						<input
+							type="number"
+							ref={this.generatorNumberInput}
+						></input>
+						<button onClick={this.generateEvents.bind(this)}>
+							Add
+						</button>
+					</div>
 				</section>
 			</div>
 		)
